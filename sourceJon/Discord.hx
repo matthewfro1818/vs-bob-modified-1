@@ -1,5 +1,5 @@
 package;
-//bitcoiner
+
 #if windows
 import Sys.sleep;
 import discord_rpc.DiscordRpc;
@@ -10,19 +10,22 @@ class DiscordClient
 {
 	public function new()
 	{
-		trace("bitcoiner");
+		trace("Discord Client starting...");
 		DiscordRpc.start({
-			clientID: "852943859922370570", // change this to what ever the fuck you want lol852931205794889758852931205794889758852931205794889758852931205794889758852931205794889758852931205794889758852931205794889758852931205794889758852931205794889758852931205794889758852931205794889758852931205794889758852931205794889758852931205794889758852931205794889758852931205794889758852931205794889758852931205794889758852931205794889758852931205794889758852931205794889758852931205794889758852931205794889758852931205794889758852931205794889758852931205794889758852931205794889758852931205794889758852931205794889758852931205794889758852931205794889758
+			clientID: "557069829501091850", // change this to what ever the fuck you want lol
+			onReady: onReady,
 			onError: onError,
 			onDisconnected: onDisconnected
 		});
-		trace("bitcoiner");
+		trace("Discord Client started.");
+
 		while (true)
 		{
 			DiscordRpc.process();
 			sleep(2);
 			//trace("Discord Client Update");
 		}
+
 		DiscordRpc.shutdown();
 	}
 
@@ -30,13 +33,14 @@ class DiscordClient
 	{
 		DiscordRpc.shutdown();
 	}
+
 	static function onReady()
 	{
 		DiscordRpc.presence({
 			details: "In the Menus",
 			state: null,
-			largeImageKey: 'largeimagekey',
-			largeImageText: "mmmmbob"
+			largeImageKey: 'icon',
+			largeImageText: "fridaynightfunkin"
 		});
 	}
 
@@ -71,8 +75,8 @@ class DiscordClient
 		DiscordRpc.presence({
 			details: details,
 			state: state,
-			largeImageKey: 'largeimagekey',
-			largeImageText: "mmmmbob",
+			largeImageKey: 'icon',
+			largeImageText: "fridaynightfunkin",
 			smallImageKey : smallImageKey,
 			// Obtained times are in milliseconds so they are divided so Discord can use it
 			startTimestamp : Std.int(startTimestamp / 1000),

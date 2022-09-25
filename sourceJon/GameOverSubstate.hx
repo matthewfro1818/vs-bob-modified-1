@@ -4,7 +4,6 @@ import flixel.FlxG;
 import flixel.FlxObject;
 import flixel.FlxSubState;
 import flixel.math.FlxPoint;
-import flixel.FlxSprite;
 import flixel.util.FlxColor;
 import flixel.util.FlxTimer;
 
@@ -14,27 +13,16 @@ class GameOverSubstate extends MusicBeatSubstate
 	var camFollow:FlxObject;
 
 	var stageSuffix:String = "";
-	
+
 	public function new(x:Float, y:Float)
 	{
-		var red:FlxSprite = new FlxSprite(-100, -100).makeGraphic(FlxG.width * 2, FlxG.height * 2, FlxColor.WHITE);
-		red.scrollFactor.set();
 		var daStage = PlayState.curStage;
 		var daBf:String = '';
-		switch (daStage)
+		switch (PlayState.SONG.player1)
 		{
-			case 'school':
+			case 'bf-pixel':
 				stageSuffix = '-pixel';
 				daBf = 'bf-pixel-dead';
-			case 'schoolEvil':
-				stageSuffix = '-pixel';
-				daBf = 'bf-pixel-dead';
-			case 'slaught':
-				stageSuffix = '-BOB';
-				daBf = 'bf-spiked';
-			case 'hellstage':
-				stageSuffix = '-BOB';
-				daBf = 'bf-spiked';
 			default:
 				daBf = 'bf';
 		}
@@ -42,20 +30,13 @@ class GameOverSubstate extends MusicBeatSubstate
 		super();
 
 		Conductor.songPosition = 0;
-		
-		if (daStage == 'slaught')
-		{
-			add(red);
-		}
-		if (daStage == 'hellstage')
-		{
-			add(red);
-		}
-		
+
 		bf = new Boyfriend(x, y, daBf);
 		add(bf);
-		camFollow = new FlxObject(bf.getMidpoint().x - 200 ,bf.getMidpoint().y - 100, 1, 1);
+
+		camFollow = new FlxObject(bf.getGraphicMidpoint().x, bf.getGraphicMidpoint().y, 1, 1);
 		add(camFollow);
+
 		FlxG.sound.play(Paths.sound('fnf_loss_sfx' + stageSuffix));
 		Conductor.changeBPM(100);
 
@@ -63,32 +44,12 @@ class GameOverSubstate extends MusicBeatSubstate
 		// FlxG.camera.focusOn(FlxPoint.get(FlxG.width / 2, FlxG.height / 2));
 		FlxG.camera.scroll.set();
 		FlxG.camera.target = null;
+
 		bf.playAnim('firstDeath');
-		switch (daStage)
-		{
-			case 'hellstage':
-				var website:Array<String>;
-				if (FlxG.random.bool(0.1))
-				{
-					website = ["https://sites.google.com/view/bobisripped/home"];
-				}
-				else
-				{
-					website = CoolUtil.coolTextFile(Paths.txt('run/website'));
-				}
-				if (!FlxG.save.data.websiteoption)
-				{
-					#if linux
-						Sys.command('/usr/bin/xdg-open', [website[0], "&"]);
-					#else
-						FlxG.openURL(website[0]);
-					#end
-					Sys.exit(0);
-				}
-		}
-		
 	}
-	
+
+	var startVibin:Bool = false;
+
 	override function update(elapsed:Float)
 	{
 		super.update(elapsed);
@@ -96,6 +57,11 @@ class GameOverSubstate extends MusicBeatSubstate
 		if (controls.ACCEPT)
 		{
 			endBullshit();
+		}
+
+		if(FlxG.save.data.InstantRespawn)
+		{
+			LoadingState.loadAndSwitchState(new PlayState());
 		}
 
 		if (controls.BACK)
@@ -117,6 +83,7 @@ class GameOverSubstate extends MusicBeatSubstate
 		if (bf.animation.curAnim.name == 'firstDeath' && bf.animation.curAnim.finished)
 		{
 			FlxG.sound.playMusic(Paths.music('gameOver' + stageSuffix));
+			startVibin = true;
 		}
 
 		if (FlxG.sound.music.playing)
@@ -129,6 +96,10 @@ class GameOverSubstate extends MusicBeatSubstate
 	{
 		super.beatHit();
 
+		if (startVibin && !isEnding)
+		{
+			bf.playAnim('deathLoop', true);
+		}
 		FlxG.log.add('beat');
 	}
 
@@ -138,6 +109,7 @@ class GameOverSubstate extends MusicBeatSubstate
 	{
 		if (!isEnding)
 		{
+			PlayState.startTime = 0;
 			isEnding = true;
 			bf.playAnim('deathConfirm', true);
 			FlxG.sound.music.stop();
